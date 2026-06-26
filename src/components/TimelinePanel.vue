@@ -123,23 +123,76 @@ const speedSeries = computed(() => {
   });
 });
 
-const speedPath = computed(() => {
+const CHART_WIDTH = 360;
+const CHART_HEIGHT = 72;
+const CHART_PAD = 4;
+const CHART_VIEW_HEIGHT = 80;
+
+const runStartIndex = computed(() => segments.value.run.start);
+const runEndIndex = computed(() => segments.value.run.end);
+
+const speedChartCoords = computed(() => {
   const series = speedSeries.value;
-  if (series.length < 2) return '';
+  if (!series.length) return [];
 
   const maxSpeed = Math.max(...series.map((s) => s.displaySpeed), 1);
-  const width = 360;
-  const height = 72;
-  const pad = 4;
 
-  const coords = series.map((entry, index) => {
-    const x = pad + (index / Math.max(series.length - 1, 1)) * (width - pad * 2);
-    const y = pad + height - pad - (entry.displaySpeed / maxSpeed) * (height - pad * 2);
-    return `${x.toFixed(1)},${y.toFixed(1)}`;
+  return series.map((entry, index) => {
+    const x =
+      CHART_PAD +
+      (index / Math.max(series.length - 1, 1)) * (CHART_WIDTH - CHART_PAD * 2);
+    const y =
+      CHART_PAD +
+      CHART_HEIGHT -
+      CHART_PAD -
+      (entry.displaySpeed / maxSpeed) * (CHART_HEIGHT - CHART_PAD * 2);
+    return { x, y, index };
   });
-
-  return `M ${coords.join(' L ')}`;
 });
+
+function speedPathForRange(start: number, end: number) {
+  const coords = speedChartCoords.value.filter(
+    (coord) => coord.index >= start && coord.index <= end,
+  );
+  if (coords.length < 2) return '';
+  return `M ${coords.map((c) => `${c.x.toFixed(1)},${c.y.toFixed(1)}`).join(' L ')}`;
+}
+
+const trimBeforeSpeedPath = computed(() => {
+  if (runStartIndex.value <= 0) return '';
+  return speedPathForRange(0, runStartIndex.value - 1);
+});
+
+const trimAfterSpeedPath = computed(() => {
+  if (runEndIndex.value >= speedSeries.value.length - 1) return '';
+  return speedPathForRange(runEndIndex.value + 1, speedSeries.value.length - 1);
+});
+
+const runSpeedPath = computed(() =>
+  speedPathForRange(runStartIndex.value, runEndIndex.value),
+);
+
+const runBand = computed(() => {
+  const coords = speedChartCoords.value;
+  if (!coords.length) return null;
+
+  const startCoord = coords.find((c) => c.index === runStartIndex.value);
+  const endCoord = coords.find((c) => c.index === runEndIndex.value);
+  if (!startCoord || !endCoord) return null;
+
+  return {
+    x: startCoord.x,
+    width: Math.max(endCoord.x - startCoord.x, 1),
+  };
+});
+
+const runStartLineX = computed(
+  () => speedChartCoords.value.find((c) => c.index === runStartIndex.value)?.x ?? null,
+);
+
+const runEndLineX = computed(
+  () => speedChartCoords.value.find((c) => c.index === runEndIndex.value)?.x ?? null,
+);
 
 const peakSpeedLabel = computed(() => {
   const peakKph = Math.max(...speedSeries.value.map((s) => s.kph), 0);
@@ -226,14 +279,63 @@ function handleResetTrim() {
           </div>
           <div class="tw-rounded-lg tw-border tw-border-slate-200 tw-bg-slate-50 tw-p-3">
             <svg
-              viewBox="0 0 360 80"
+              :viewBox="`0 0 ${CHART_WIDTH} ${CHART_VIEW_HEIGHT}`"
               class="tw-h-20 tw-w-full"
               role="img"
-              aria-label="Speed chart"
+              aria-label="Speed chart with run window highlighted"
             >
+              <rect
+                v-if="runBand"
+                :x="runBand.x"
+                y="0"
+                :width="runBand.width"
+                :height="CHART_VIEW_HEIGHT"
+                fill="#1d65f1"
+                opacity="0.08"
+              />
+              <line
+                v-if="runStartLineX != null"
+                :x1="runStartLineX"
+                y1="0"
+                :x2="runStartLineX"
+                :y2="CHART_VIEW_HEIGHT"
+                stroke="#10b981"
+                stroke-width="1"
+                stroke-dasharray="3 3"
+                opacity="0.7"
+              />
+              <line
+                v-if="runEndLineX != null"
+                :x1="runEndLineX"
+                y1="0"
+                :x2="runEndLineX"
+                :y2="CHART_VIEW_HEIGHT"
+                stroke="#ef4444"
+                stroke-width="1"
+                stroke-dasharray="3 3"
+                opacity="0.7"
+              />
               <path
-                v-if="speedPath"
-                :d="speedPath"
+                v-if="trimBeforeSpeedPath"
+                :d="trimBeforeSpeedPath"
+                fill="none"
+                stroke="#cbd5e1"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              />
+              <path
+                v-if="trimAfterSpeedPath"
+                :d="trimAfterSpeedPath"
+                fill="none"
+                stroke="#cbd5e1"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              />
+              <path
+                v-if="runSpeedPath"
+                :d="runSpeedPath"
                 fill="none"
                 stroke="#1d65f1"
                 stroke-width="2"
@@ -243,6 +345,8 @@ function handleResetTrim() {
             </svg>
             <p class="tw-mt-1 tw-text-xs tw-text-slate-500">
               Uses FIT device speed when available, otherwise GPS-derived speed.
+              <span class="tw-text-slate-400">·</span>
+              Grey = trimmed lead-in/trail-out.
             </p>
           </div>
         </div>

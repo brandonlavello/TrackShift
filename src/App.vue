@@ -26,15 +26,15 @@ const gpxStore = useGpxStore();
           title="Raw track"
           subtitle="Full GPS activity as recorded"
           :points="gpxStore.allPoints"
+          :run-segment="gpxStore.segments.run"
           variant="raw"
-          :highlight-segment="gpxStore.segments.run"
-          :secondary-segment="gpxStore.trimBefore"
-          :tertiary-segment="gpxStore.trimAfter"
         />
         <MapPanel
           title="Corrected track"
           subtitle="Ship motion subtracted from selected run"
-          :points="gpxStore.correctedRunPoints"
+          :points="gpxStore.allPoints"
+          :run-segment="gpxStore.segments.run"
+          :corrected-run-points="gpxStore.correctedRunPoints"
           variant="corrected"
         />
       </div>

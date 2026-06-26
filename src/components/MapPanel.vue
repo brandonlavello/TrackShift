@@ -14,46 +14,48 @@ const props = defineProps({
     type: Array,
     default: () => [],
   },
+  runSegment: {
+    type: Object,
+    default: null,
+  },
+  correctedRunPoints: {
+    type: Array,
+    default: () => [],
+  },
   variant: {
     type: String,
     default: 'raw',
     validator: (value) => ['raw', 'corrected'].includes(value),
   },
-  highlightSegment: {
-    type: Object,
-    default: null,
-  },
-  secondarySegment: {
-    type: Object,
-    default: null,
-  },
-  tertiarySegment: {
-    type: Object,
-    default: null,
-  },
 });
 
 const viewBox = '0 0 400 280';
+const TRIM_STROKE = '#cbd5e1';
+const RAW_RUN_STROKE = '#475569';
+const CORRECTED_RUN_STROKE = '#1d65f1';
+
+const gridPatternId = computed(() => `map-grid-${props.variant}`);
 
 function readLon(point) {
   return point?.lon ?? point?.lng;
 }
 
-function projectPoints(points) {
-  if (!points.length) {
-    return { coords: [], bounds: null };
+function buildProjection(pointSets) {
+  const entries = [];
+  for (const points of pointSets) {
+    for (const point of points) {
+      if (point?.lat != null && readLon(point) != null) {
+        entries.push({ lat: point.lat, lon: readLon(point) });
+      }
+    }
   }
 
-  const positioned = points
-    .map((point) => ({ point, lat: point.lat, lon: readLon(point) }))
-    .filter((entry) => entry.lat != null && entry.lon != null);
-
-  if (!positioned.length) {
-    return { coords: [], bounds: null };
+  if (!entries.length) {
+    return { project: () => null };
   }
 
-  const lats = positioned.map((entry) => entry.lat);
-  const lons = positioned.map((entry) => entry.lon);
+  const lats = entries.map((entry) => entry.lat);
+  const lons = entries.map((entry) => entry.lon);
   const minLat = Math.min(...lats);
   const maxLat = Math.max(...lats);
   const minLon = Math.min(...lons);
@@ -73,76 +75,80 @@ function projectPoints(points) {
   const offsetX = pad + (width - drawW) / 2;
   const offsetY = pad + (height - drawH) / 2;
 
-  const coords = positioned.map((entry) => ({
-    x: offsetX + (entry.lon - minLon) * metersPerDegLon * scale,
-    y: offsetY + (maxLat - entry.lat) * metersPerDegLat * scale,
-  }));
-
   return {
-    coords,
-    bounds: {
-      minLat,
-      maxLat,
-      minLon,
-      maxLon,
-      pad,
-      width,
-      height,
-      latSpanM,
-      lonSpanM,
-      scale,
-      offsetX,
-      offsetY,
-      metersPerDegLat,
-      metersPerDegLon,
+    project(point) {
+      if (point?.lat == null || readLon(point) == null) return null;
+      return {
+        x: offsetX + (readLon(point) - minLon) * metersPerDegLon * scale,
+        y: offsetY + (maxLat - point.lat) * metersPerDegLat * scale,
+      };
     },
   };
 }
 
-const projectedTrack = computed(() => projectPoints(props.points));
-
-const pathData = computed(() => {
-  const { coords } = projectedTrack.value;
-  if (!coords.length) return '';
-  return `M ${coords.map((c) => `${c.x.toFixed(1)},${c.y.toFixed(1)}`).join(' L ')}`;
+const projection = computed(() => {
+  const sets = [props.points];
+  if (props.variant === 'corrected' && props.correctedRunPoints.length) {
+    sets.push(props.correctedRunPoints);
+  }
+  return buildProjection(sets);
 });
 
-const startMarker = computed(() => projectedTrack.value.coords[0] ?? null);
-const endMarker = computed(() => projectedTrack.value.coords.at(-1) ?? null);
+const pointCoords = computed(() => props.points.map((point) => projection.value.project(point)));
 
-const segmentPath = computed(() => buildSegmentPath(props.highlightSegment));
-const secondarySegmentPath = computed(() => buildSegmentPath(props.secondarySegment));
-const tertiarySegmentPath = computed(() => buildSegmentPath(props.tertiarySegment));
-
-function buildSegmentPath(segment) {
-  if (!segment || !props.points.length) return '';
-
-  const { start, end } = segment;
-  const segmentPoints = props.points.slice(start, end + 1);
-  if (!segmentPoints.length) return '';
-
-  const { bounds } = projectedTrack.value;
-  if (!bounds) return '';
-
-  const coords = segmentPoints
-    .map((point) => ({ lat: point.lat, lon: readLon(point) }))
-    .filter((entry) => entry.lat != null && entry.lon != null)
-    .map((entry) => {
-      const x =
-        bounds.offsetX + (entry.lon - bounds.minLon) * bounds.metersPerDegLon * bounds.scale;
-      const y =
-        bounds.offsetY + (bounds.maxLat - entry.lat) * bounds.metersPerDegLat * bounds.scale;
-      return `${x.toFixed(1)},${y.toFixed(1)}`;
-    });
-
-  return coords.length ? `M ${coords.join(' L ')}` : '';
-}
-
-const strokeColor = computed(() =>
-  props.variant === 'corrected' ? '#1d65f1' : '#64748b',
+const correctedCoords = computed(() =>
+  props.correctedRunPoints.map((point) => projection.value.project(point)),
 );
 
-const hasTrack = computed(() => projectedTrack.value.coords.length > 0);
+const runStart = computed(() => props.runSegment?.start ?? 0);
+const runEnd = computed(() =>
+  props.runSegment?.end ?? Math.max(props.points.length - 1, 0),
+);
+
+function coordsToPath(coords) {
+  const valid = coords.filter(Boolean);
+  if (!valid.length) return '';
+  return `M ${valid.map((c) => `${c.x.toFixed(1)},${c.y.toFixed(1)}`).join(' L ')}`;
+}
+
+function pathForRange(coords, start, end) {
+  if (end < start) return '';
+  return coordsToPath(coords.slice(start, end + 1));
+}
+
+const trimBeforePath = computed(() => {
+  if (runStart.value <= 0) return '';
+  return pathForRange(pointCoords.value, 0, runStart.value - 1);
+});
+
+const trimAfterPath = computed(() => {
+  if (runEnd.value >= props.points.length - 1) return '';
+  return pathForRange(pointCoords.value, runEnd.value + 1, props.points.length - 1);
+});
+
+const runPath = computed(() => {
+  if (props.variant === 'corrected') {
+    return coordsToPath(correctedCoords.value);
+  }
+  return pathForRange(pointCoords.value, runStart.value, runEnd.value);
+});
+
+const runStartMarker = computed(() => {
+  if (props.variant === 'corrected') {
+    return correctedCoords.value[0] ?? pointCoords.value[runStart.value] ?? null;
+  }
+  return pointCoords.value[runStart.value] ?? null;
+});
+
+const runEndMarker = computed(() => {
+  if (props.variant === 'corrected') {
+    return correctedCoords.value.at(-1) ?? pointCoords.value[runEnd.value] ?? null;
+  }
+  return pointCoords.value[runEnd.value] ?? null;
+});
+
+const hasTrack = computed(() => pointCoords.value.some(Boolean));
+const hasTrim = computed(() => Boolean(trimBeforePath.value || trimAfterPath.value));
 </script>
 
 <template>
@@ -188,7 +194,7 @@ const hasTrack = computed(() => projectedTrack.value.coords.length > 0);
         >
           <defs>
             <pattern
-              id="grid"
+              :id="gridPatternId"
               width="20"
               height="20"
               patternUnits="userSpaceOnUse"
@@ -204,59 +210,54 @@ const hasTrack = computed(() => projectedTrack.value.coords.length > 0);
           <rect
             width="400"
             height="280"
-            fill="url(#grid)"
+            :fill="`url(#${gridPatternId})`"
           />
           <path
-            v-if="tertiarySegmentPath"
-            :d="tertiarySegmentPath"
+            v-if="trimBeforePath"
+            :d="trimBeforePath"
             fill="none"
-            stroke="#fb923c"
-            stroke-width="4"
+            :stroke="TRIM_STROKE"
+            stroke-width="2.5"
             stroke-linecap="round"
             stroke-linejoin="round"
-            opacity="0.2"
+            stroke-dasharray="5 4"
           />
           <path
-            v-if="secondarySegmentPath"
-            :d="secondarySegmentPath"
+            v-if="trimAfterPath"
+            :d="trimAfterPath"
             fill="none"
-            stroke="#f97316"
-            stroke-width="4"
+            :stroke="TRIM_STROKE"
+            stroke-width="2.5"
             stroke-linecap="round"
             stroke-linejoin="round"
-            opacity="0.25"
+            stroke-dasharray="5 4"
           />
           <path
-            v-if="segmentPath"
-            :d="segmentPath"
+            v-if="runPath"
+            :d="runPath"
             fill="none"
-            stroke="#f59e0b"
-            stroke-width="4"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            opacity="0.35"
-          />
-          <path
-            :d="pathData"
-            fill="none"
-            :stroke="strokeColor"
+            :stroke="variant === 'corrected' ? CORRECTED_RUN_STROKE : RAW_RUN_STROKE"
             stroke-width="3"
             stroke-linecap="round"
             stroke-linejoin="round"
           />
           <circle
-            v-if="startMarker"
-            :cx="startMarker.x"
-            :cy="startMarker.y"
+            v-if="runStartMarker"
+            :cx="runStartMarker.x"
+            :cy="runStartMarker.y"
             r="5"
             fill="#10b981"
+            stroke="#fff"
+            stroke-width="1.5"
           />
           <circle
-            v-if="endMarker"
-            :cx="endMarker.x"
-            :cy="endMarker.y"
+            v-if="runEndMarker"
+            :cx="runEndMarker.x"
+            :cy="runEndMarker.y"
             r="5"
             fill="#ef4444"
+            stroke="#fff"
+            stroke-width="1.5"
           />
         </svg>
 
@@ -271,15 +272,25 @@ const hasTrack = computed(() => projectedTrack.value.coords.length > 0);
 
         <div
           v-if="hasTrack"
-          class="tw-absolute tw-bottom-2 tw-left-2 tw-flex tw-gap-3 tw-rounded-md tw-bg-white/90 tw-px-2 tw-py-1 tw-text-[10px] tw-text-slate-600 tw-backdrop-blur"
+          class="tw-absolute tw-bottom-2 tw-left-2 tw-flex tw-flex-wrap tw-gap-x-3 tw-gap-y-1 tw-rounded-md tw-bg-white/90 tw-px-2 tw-py-1 tw-text-[10px] tw-text-slate-600 tw-backdrop-blur"
         >
           <span class="tw-flex tw-items-center tw-gap-1">
             <span class="tw-inline-block tw-h-2 tw-w-2 tw-rounded-full tw-bg-emerald-500" />
-            Start
+            Run start
           </span>
           <span class="tw-flex tw-items-center tw-gap-1">
             <span class="tw-inline-block tw-h-2 tw-w-2 tw-rounded-full tw-bg-red-500" />
-            End
+            Run end
+          </span>
+          <span
+            v-if="hasTrim"
+            class="tw-flex tw-items-center tw-gap-1"
+          >
+            <span
+              class="tw-inline-block tw-h-0.5 tw-w-3 tw-border-t tw-border-dashed tw-border-slate-300"
+              aria-hidden="true"
+            />
+            Trimmed
           </span>
         </div>
       </div>

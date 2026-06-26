@@ -1,0 +1,63 @@
+@import 'tailwindcss/base';
+@import 'tailwindcss/components';
+@import 'tailwindcss/utilities';
+
+@layer base {
+  body {
+    @apply tw-bg-slate-50 tw-text-slate-900;
+  }
+}
+
+@layer components {
+  .dashboard-card {
+    @apply tw-rounded-xl tw-border tw-border-surface-border tw-bg-white tw-shadow-card;
+  }
+
+  .dashboard-card-header {
+    @apply tw-flex tw-items-center tw-justify-between tw-gap-3 tw-border-b tw-border-surface-border tw-px-4 tw-py-3 sm:tw-px-5;
+  }
+
+  .dashboard-card-body {
+    @apply tw-p-4 sm:tw-p-5;
+  }
+
+  .stat-label {
+    @apply tw-text-xs tw-font-medium tw-uppercase tw-tracking-wide tw-text-slate-500;
+  }
+
+  .stat-value {
+    @apply tw-mt-1 tw-text-lg tw-font-semibold tw-tabular-nums tw-text-slate-900;
+  }
+
+  .btn-primary {
+    @apply tw-inline-flex tw-items-center tw-justify-center tw-gap-2 tw-rounded-lg tw-bg-brand-600 tw-px-4 tw-py-2.5 tw-text-sm tw-font-semibold tw-text-white tw-transition hover:tw-bg-brand-700 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-brand-600 disabled:tw-cursor-not-allowed disabled:tw-opacity-50;
+  }
+
+  .btn-secondary {
+    @apply tw-inline-flex tw-items-center tw-justify-center tw-gap-2 tw-rounded-lg tw-border tw-border-surface-border tw-bg-white tw-px-4 tw-py-2.5 tw-text-sm tw-font-semibold tw-text-slate-700 tw-transition hover:tw-bg-slate-50 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-brand-600 disabled:tw-cursor-not-allowed disabled:tw-opacity-50;
+  }
+
+  .form-label {
+    @apply tw-block tw-text-sm tw-font-medium tw-text-slate-700;
+  }
+
+  .form-hint {
+    @apply tw-mt-1 tw-text-xs tw-text-slate-500;
+  }
+
+  .slider-control {
+    @apply tw-h-2 tw-cursor-pointer tw-appearance-none tw-rounded-full tw-bg-slate-200 tw-accent-brand-600;
+  }
+
+  .slider-control::-webkit-slider-thumb {
+    @apply tw-h-4 tw-w-4 tw-appearance-none tw-rounded-full tw-bg-brand-600 tw-shadow-sm tw-transition-transform;
+  }
+
+  .slider-control:active::-webkit-slider-thumb {
+    @apply tw-scale-110;
+  }
+
+  .slider-control::-moz-range-thumb {
+    @apply tw-h-4 tw-w-4 tw-rounded-full tw-border-0 tw-bg-brand-600 tw-shadow-sm;
+  }
+}

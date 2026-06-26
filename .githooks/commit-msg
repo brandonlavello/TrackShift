@@ -1,0 +1,5 @@
+#!/bin/sh
+# Drop Cursor agent attribution from commit messages (local processing stays in-repo).
+tmp="$(mktemp)"
+grep -v '^Co-authored-by: Cursor <cursoragent@cursor.com>$' "$1" >"$tmp"
+mv "$tmp" "$1"

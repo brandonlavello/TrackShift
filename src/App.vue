@@ -4,6 +4,7 @@ import CorrectionControls from '@/components/CorrectionControls.vue';
 import ExportButton from '@/components/ExportButton.vue';
 import FitInspector from '@/components/FitInspector.vue';
 import GpxUploader from '@/components/GpxUploader.vue';
+import CruiseRunTips from '@/components/CruiseRunTips.vue';
 import MapPanel from '@/components/MapPanel.vue';
 import QualityMetrics from '@/components/QualityMetrics.vue';
 import StatsPanel from '@/components/StatsPanel.vue';
@@ -20,6 +21,7 @@ const gpxStore = useGpxStore();
 
     <main class="tw-mx-auto tw-max-w-7xl tw-space-y-6 tw-px-4 tw-py-6 sm:tw-px-6 lg:tw-px-8">
       <GpxUploader />
+      <CruiseRunTips />
 
       <div class="tw-grid tw-gap-6 lg:tw-grid-cols-2">
         <MapPanel

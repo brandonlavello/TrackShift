@@ -4,6 +4,7 @@ import { version } from '../../package.json';
 import StatsForNerds from '@/components/StatsForNerds.vue';
 
 const repoUrl = 'https://github.com/brandonlavello/TrackShift';
+const repoGuideUrl = `${repoUrl}#recording-on-a-cruise-ship`;
 const siteUrl = 'https://brandonlavello.com';
 const year = new Date().getFullYear();
 </script>
@@ -37,6 +38,16 @@ const year = new Date().getFullYear();
                 class="tw-text-slate-600 tw-underline-offset-2 hover:tw-text-brand-600 hover:tw-underline"
               >
                 Source on GitHub
+              </a>
+            </li>
+            <li>
+              <a
+                :href="repoGuideUrl"
+                target="_blank"
+                rel="noopener noreferrer"
+                class="tw-text-slate-600 tw-underline-offset-2 hover:tw-text-brand-600 hover:tw-underline"
+              >
+                How to use (README)
               </a>
             </li>
             <li>

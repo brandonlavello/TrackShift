@@ -374,13 +374,6 @@ function isActive(ring) {
         </span>
       </div>
     </div>
-
-    <p class="tw-text-xs tw-leading-relaxed tw-text-slate-500">
-      Locally, Earth looks like a closed loop around the Sun. Galactically, that “orbit” is a
-      helical path: the Sun hauls the entire planetary system ~220 km/s around the Galactic center
-      while you’re still doing laps at ~30 km/s. Your corrected GPS track is a sub-millimeter
-      perturbation on that stack of reference frames.
-    </p>
   </div>
 </template>
 

@@ -88,7 +88,7 @@ function toggle() {
       aria-controls="stats-for-nerds-panel"
       @click="toggle"
     >
-      <span>Stats for nerds — motion in other reference frames</span>
+      <span>Stats for nerds</span>
       <ChevronUpIcon
         v-if="isOpen"
         class="tw-h-3.5 tw-w-3.5 tw-shrink-0"

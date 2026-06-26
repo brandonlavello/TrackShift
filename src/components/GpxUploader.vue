@@ -68,7 +68,7 @@ function onFileChange(event) {
           Upload Activity
         </h2>
         <p class="tw-mt-0.5 tw-text-sm tw-text-slate-500">
-          Garmin FIT preferred. GPX supported as fallback. Nothing leaves your device.
+          Garmin FIT preferred. GPX supported as fallback.
         </p>
       </div>
       <div class="tw-flex tw-gap-2">

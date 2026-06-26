@@ -24,18 +24,15 @@ import UnitToggle from '@/components/UnitToggle.vue';
             TrackShift
           </h1>
           <p class="tw-mt-0.5 tw-max-w-xl tw-text-sm tw-text-slate-600">
-            Correct GPS tracks recorded on a moving ship. All processing stays in your browser.
+            Correct GPS tracks recorded on a moving ship. All processing stays in your
+            browser.
+            <span class="tw-text-slate-500">· No upload, no account.</span>
           </p>
         </div>
       </div>
 
       <div class="tw-flex tw-flex-wrap tw-items-center tw-gap-2">
         <UnitToggle />
-        <span
-          class="tw-inline-flex tw-items-center tw-rounded-full tw-bg-emerald-50 tw-px-3 tw-py-1 tw-text-xs tw-font-medium tw-text-emerald-700 tw-ring-1 tw-ring-inset tw-ring-emerald-600/20"
-        >
-          No upload · No account
-        </span>
       </div>
     </div>
   </header>

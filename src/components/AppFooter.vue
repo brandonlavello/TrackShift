@@ -7,6 +7,9 @@ const repoUrl = 'https://github.com/brandonlavello/TrackShift';
 const repoGuideUrl = `${repoUrl}#recording-on-a-cruise-ship`;
 const siteUrl = 'https://brandonlavello.com';
 const year = new Date().getFullYear();
+
+/** Set true to show the footer reference-frame Easter egg. */
+const showStatsForNerds = false;
 </script>
 
 <template>
@@ -85,7 +88,7 @@ const year = new Date().getFullYear();
         </div>
       </div>
 
-      <StatsForNerds />
+      <StatsForNerds v-if="showStatsForNerds" />
 
       <div
         class="tw-flex tw-flex-col tw-gap-1 tw-border-t tw-border-slate-100 tw-pt-4 sm:tw-flex-row sm:tw-items-center sm:tw-justify-between"

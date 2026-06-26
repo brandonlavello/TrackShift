@@ -10,7 +10,7 @@ import {
 import { useGpxStore } from '@/stores/gpxStore';
 
 const gpxStore = useGpxStore();
-const isOpen = ref(true);
+const isOpen = ref(false);
 
 const repoGuideUrl =
   'https://github.com/brandonlavello/TrackShift#recording-on-a-cruise-ship';

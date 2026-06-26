@@ -32,9 +32,7 @@ const gpxStore = useGpxStore();
         <MapPanel
           title="Corrected track"
           subtitle="Ship motion subtracted from selected run"
-          :points="gpxStore.allPoints"
-          :run-segment="gpxStore.segments.run"
-          :corrected-run-points="gpxStore.correctedRunPoints"
+          :points="gpxStore.correctedRunPoints"
           variant="corrected"
         />
       </div>

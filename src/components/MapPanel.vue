@@ -18,10 +18,6 @@ const props = defineProps({
     type: Object,
     default: null,
   },
-  correctedRunPoints: {
-    type: Array,
-    default: () => [],
-  },
   variant: {
     type: String,
     default: 'raw',
@@ -86,19 +82,11 @@ function buildProjection(pointSets) {
   };
 }
 
-const projection = computed(() => {
-  const sets = [props.points];
-  if (props.variant === 'corrected' && props.correctedRunPoints.length) {
-    sets.push(props.correctedRunPoints);
-  }
-  return buildProjection(sets);
-});
+const projection = computed(() => buildProjection([props.points]));
 
 const pointCoords = computed(() => props.points.map((point) => projection.value.project(point)));
 
-const correctedCoords = computed(() =>
-  props.correctedRunPoints.map((point) => projection.value.project(point)),
-);
+const isRawWithTrim = computed(() => props.variant === 'raw' && props.runSegment != null);
 
 const runStart = computed(() => props.runSegment?.start ?? 0);
 const runEnd = computed(() =>
@@ -117,38 +105,30 @@ function pathForRange(coords, start, end) {
 }
 
 const trimBeforePath = computed(() => {
-  if (runStart.value <= 0) return '';
+  if (!isRawWithTrim.value || runStart.value <= 0) return '';
   return pathForRange(pointCoords.value, 0, runStart.value - 1);
 });
 
 const trimAfterPath = computed(() => {
-  if (runEnd.value >= props.points.length - 1) return '';
+  if (!isRawWithTrim.value || runEnd.value >= props.points.length - 1) return '';
   return pathForRange(pointCoords.value, runEnd.value + 1, props.points.length - 1);
 });
 
 const runPath = computed(() => {
   if (props.variant === 'corrected') {
-    return coordsToPath(correctedCoords.value);
+    return coordsToPath(pointCoords.value);
   }
   return pathForRange(pointCoords.value, runStart.value, runEnd.value);
 });
 
-const runStartMarker = computed(() => {
-  if (props.variant === 'corrected') {
-    return correctedCoords.value[0] ?? pointCoords.value[runStart.value] ?? null;
-  }
-  return pointCoords.value[runStart.value] ?? null;
-});
+const runStartMarker = computed(() => pointCoords.value[runStart.value] ?? pointCoords.value[0] ?? null);
 
-const runEndMarker = computed(() => {
-  if (props.variant === 'corrected') {
-    return correctedCoords.value.at(-1) ?? pointCoords.value[runEnd.value] ?? null;
-  }
-  return pointCoords.value[runEnd.value] ?? null;
-});
+const runEndMarker = computed(() =>
+  pointCoords.value[runEnd.value] ?? pointCoords.value.at(-1) ?? null,
+);
 
 const hasTrack = computed(() => pointCoords.value.some(Boolean));
-const hasTrim = computed(() => Boolean(trimBeforePath.value || trimAfterPath.value));
+const hasTrim = computed(() => isRawWithTrim.value && Boolean(trimBeforePath.value || trimAfterPath.value));
 </script>
 
 <template>
@@ -213,7 +193,7 @@ const hasTrim = computed(() => Boolean(trimBeforePath.value || trimAfterPath.val
             :fill="`url(#${gridPatternId})`"
           />
           <path
-            v-if="trimBeforePath"
+            v-if="isRawWithTrim && trimBeforePath"
             :d="trimBeforePath"
             fill="none"
             :stroke="TRIM_STROKE"
@@ -223,7 +203,7 @@ const hasTrim = computed(() => Boolean(trimBeforePath.value || trimAfterPath.val
             stroke-dasharray="5 4"
           />
           <path
-            v-if="trimAfterPath"
+            v-if="isRawWithTrim && trimAfterPath"
             :d="trimAfterPath"
             fill="none"
             :stroke="TRIM_STROKE"

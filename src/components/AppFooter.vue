@@ -82,6 +82,16 @@ const showStatsForNerds = false;
           </p>
           <ul class="tw-mt-2 tw-space-y-1.5 tw-text-xs tw-leading-relaxed tw-text-slate-500">
             <li>Files are parsed in your browser and never uploaded to a server.</li>
+            <li>
+              The hosted demo may use
+              <a
+                href="https://www.cloudflare.com/web-analytics/"
+                target="_blank"
+                rel="noopener noreferrer"
+                class="tw-underline-offset-2 hover:tw-text-slate-700 hover:tw-underline"
+              >Cloudflare Web Analytics</a>
+              for anonymous traffic metrics.
+            </li>
             <li>Not affiliated with Garmin, Strava, or any cruise line.</li>
             <li>Ship motion estimates are approximate — not for navigation or safety.</li>
           </ul>

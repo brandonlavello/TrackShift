@@ -79,9 +79,10 @@ The maps are **schematic**, not geographic basemaps. They show **shape** (lap cl
 
 ## Privacy
 
-- No backend, accounts, or analytics in this repo
-- Parsing, correction, and export are 100% client-side
-- Your activity file is not uploaded to a server when you use the hosted app
+- No backend, accounts, or activity-file uploads
+- Parsing, correction, and export run entirely in your browser
+- FIT/GPX files are not uploaded when you use the hosted app
+- The public GitHub Pages demo may load [Cloudflare Web Analytics](https://www.cloudflare.com/web-analytics/) for anonymous traffic metrics only (not activity data). Clones and self-hosted builds do not unless configured — see [docs/analytics-setup.md](docs/analytics-setup.md)
 
 ## Quick start (developers)
 

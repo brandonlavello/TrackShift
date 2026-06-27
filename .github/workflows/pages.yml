@@ -29,6 +29,7 @@ jobs:
       - run: npm run build:pages
         env:
           GITHUB_PAGES: 'true'
+          VITE_CF_BEACON_TOKEN: ${{ secrets.CF_WEB_ANALYTICS_TOKEN }}
 
       - uses: actions/upload-pages-artifact@v3
         with:

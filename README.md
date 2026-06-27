@@ -1,8 +1,8 @@
 # TrackShift
 
-**Correct GPS tracks recorded on a moving ship.**
+**Correct GPS tracks from cruise ship deck runs.**
 
-Browser-based FIT/GPX corrector for runs on cruise ships (and other moving platforms). Export a Strava-friendly GPX with ship motion removed. Everything runs **in your browser** — files are never uploaded to a server.
+Browser-based FIT/GPX corrector for promenade and jogging-track runs on cruise ships. Export a Strava-friendly GPX with ship motion removed. Everything runs **in your browser** — files are never uploaded to a server.
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 
@@ -10,15 +10,13 @@ Browser-based FIT/GPX corrector for runs on cruise ships (and other moving platf
 
 ## Why this exists
 
-GPS watches record your position relative to the ground. On a ship, the ground is moving. A 5-mile deck run can look like 6+ miles on Strava because the track includes the ship’s motion.
+GPS watches record your position relative to the ground. On a cruise ship, the ground is moving. A 5-mile deck run can look like 6+ miles on Strava because the track includes the ship’s motion.
 
 TrackShift estimates that ship motion from standing-still time before and after your run, subtracts it from the GPS track, and exports corrected coordinates.
 
-## Ideal use case
+## Who this is for
 
-**Promenade or jogging-track runs on a cruise ship** are the sweet spot: you lap the deck while the ship moves underneath you, and your watch records both motions in one file.
-
-The same approach can help on other **steady moving platforms** (ferry, train), but cruise deck runs are what the tool is built around.
+**Promenade or jogging-track runs on a cruise ship.** You lap the deck while the ship moves underneath you, and your watch records both motions in one file. TrackShift is built for that workflow.
 
 ## Recording on a cruise ship
 

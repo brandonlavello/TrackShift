@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 
-import { estimateShipMotionFromTrimEdges } from '../metrics';
-import { makeShipDriftPoints } from './fixtures';
+import { detectRunSegmentAuto, estimateShipMotionFromTrimEdges } from '../metrics';
+import { makeFitRunActivity, makeShipDriftPoints } from './fixtures';
 
 describe('estimateShipMotionFromTrimEdges', () => {
   it('estimates speed and heading from matching lead-in and trail-out drift', () => {
@@ -36,5 +36,22 @@ describe('estimateShipMotionFromTrimEdges', () => {
     expect(estimate).not.toBeNull();
     expect(estimate!.confidenceLabel).toBe('None');
     expect(estimate!.shipSpeedKnots).toBe(0);
+  });
+});
+
+describe('detectRunSegmentAuto', () => {
+  it('detects and trims a FIT run window from standing-still edges', () => {
+    const points = makeFitRunActivity({
+      leadInCount: 30,
+      runCount: 35,
+      trailOutCount: 30,
+    });
+
+    const segment = detectRunSegmentAuto(points);
+
+    expect(segment).not.toBeNull();
+    expect(segment!.label).toBe('Auto-detected run');
+    expect(segment!.start).toBe(30);
+    expect(segment!.end).toBe(64);
   });
 });

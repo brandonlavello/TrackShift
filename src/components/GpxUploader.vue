@@ -59,7 +59,9 @@ function onFileChange(event) {
     class="dashboard-card"
     aria-labelledby="upload-heading"
   >
-    <div class="dashboard-card-header">
+    <div
+      class="dashboard-card-header tw-flex-col tw-items-stretch sm:tw-flex-row sm:tw-items-center"
+    >
       <div>
         <h2
           id="upload-heading"
@@ -71,11 +73,11 @@ function onFileChange(event) {
           Garmin FIT preferred. GPX supported as fallback.
         </p>
       </div>
-      <div class="tw-flex tw-gap-2">
+      <div class="tw-flex tw-w-full tw-gap-2 sm:tw-w-auto">
         <button
           v-if="!gpxStore.hasFile"
           type="button"
-          class="btn-secondary tw-shrink-0"
+          class="btn-secondary tw-w-full sm:tw-w-auto"
           @click="loadDemo"
         >
           <BeakerIcon
@@ -87,7 +89,7 @@ function onFileChange(event) {
         <button
           v-if="gpxStore.hasFile"
           type="button"
-          class="btn-secondary tw-shrink-0"
+          class="btn-secondary tw-w-full sm:tw-w-auto"
           @click="handleClear"
         >
           <TrashIcon

@@ -14,7 +14,11 @@
   }
 
   .dashboard-card-header {
-    @apply tw-flex tw-items-center tw-justify-between tw-gap-3 tw-border-b tw-border-surface-border tw-px-4 tw-py-3 sm:tw-px-5;
+    @apply tw-flex tw-flex-wrap tw-items-start tw-justify-between tw-gap-3 tw-border-b tw-border-surface-border tw-px-4 tw-py-3 sm:tw-items-center sm:tw-px-5;
+  }
+
+  .dashboard-card-header > :first-child {
+    @apply tw-min-w-0;
   }
 
   .dashboard-card-body {

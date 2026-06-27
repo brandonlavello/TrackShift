@@ -23,19 +23,19 @@ const steps = computed(() =>
 const speedSlider = useSliderControl(
   () => gpxStore.correction.shipSpeedKnots,
   (value) => gpxStore.updateCorrection({ shipSpeedKnots: value }),
-  { debounceMs: 150 },
+  { debounceMs: 0 },
 );
 
 const headingSlider = useSliderControl(
   () => gpxStore.correction.shipHeadingDeg,
   (value) => gpxStore.updateCorrection({ shipHeadingDeg: value }),
-  { debounceMs: 150 },
+  { debounceMs: 0 },
 );
 
 const strengthSlider = useSliderControl(
   () => gpxStore.correction.strengthPercent,
   (value) => gpxStore.updateCorrection({ strengthPercent: value }),
-  { debounceMs: 150 },
+  { debounceMs: 0 },
 );
 
 const headingLabel = computed(() => {
@@ -286,7 +286,7 @@ function clamp(value, min, max) {
           class="tw-flex tw-flex-wrap tw-items-center tw-justify-between tw-gap-2"
         >
           <p class="tw-text-xs tw-text-slate-500">
-            Preview updates while dragging; release for a final sync.
+            Preview updates instantly as you drag.
           </p>
           <button
             type="button"

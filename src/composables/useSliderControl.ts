@@ -43,6 +43,10 @@ export function useSliderControl(
     if (!Number.isFinite(value)) return;
     dragging.value = true;
     local.value = value;
+    if (debounceMs <= 0) {
+      commit(value);
+      return;
+    }
     scheduleCommit(value);
   }
 

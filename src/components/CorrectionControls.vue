@@ -8,11 +8,13 @@ import {
 } from "@heroicons/vue/24/solid";
 import { MinusCircleIcon } from "@heroicons/vue/24/outline";
 
+import FloatingCorrectedPreview from "@/components/FloatingCorrectedPreview.vue";
 import { useSliderControl } from "@/composables/useSliderControl";
 import { useGpxStore } from "@/stores/gpxStore";
 
 const gpxStore = useGpxStore();
 const fineTune = ref(false);
+const fineTuneActive = ref(false);
 
 const steps = computed(() =>
   fineTune.value
@@ -37,6 +39,23 @@ const strengthSlider = useSliderControl(
   (value) => gpxStore.updateCorrection({ strengthPercent: value }),
   { debounceMs: 0 },
 );
+
+const showFloatingPreview = computed(
+  () =>
+    gpxStore.isReady &&
+    (speedSlider.dragging.value ||
+      headingSlider.dragging.value ||
+      strengthSlider.dragging.value ||
+      fineTuneActive.value),
+);
+
+function onFineTuneFocus() {
+  fineTuneActive.value = true;
+}
+
+function onFineTuneBlur() {
+  fineTuneActive.value = false;
+}
 
 const headingLabel = computed(() => {
   const normalized = ((headingSlider.local.value % 360) + 360) % 360;
@@ -166,6 +185,11 @@ function clamp(value, min, max) {
 </script>
 
 <template>
+  <FloatingCorrectedPreview
+    :visible="showFloatingPreview"
+    :points="gpxStore.correctedRunPoints"
+  />
+
   <section
     class="dashboard-card"
     aria-labelledby="correction-heading"
@@ -318,6 +342,8 @@ function clamp(value, min, max) {
                   :value="speedSlider.local.value.toFixed(2)"
                   class="tw-w-20 tw-rounded-md tw-border tw-border-slate-300 tw-bg-white tw-px-2 tw-py-1 tw-text-right tw-text-sm tw-tabular-nums focus:tw-border-brand-500 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-brand-500"
                   aria-label="Ship speed in knots"
+                  @focus="onFineTuneFocus"
+                  @blur="onFineTuneBlur"
                   @change="speedSlider.handleChange($event.target.value)"
                 >
                 <span
@@ -362,6 +388,8 @@ function clamp(value, min, max) {
                   :value="headingSlider.local.value.toFixed(1)"
                   class="tw-w-20 tw-rounded-md tw-border tw-border-slate-300 tw-bg-white tw-px-2 tw-py-1 tw-text-right tw-text-sm tw-tabular-nums focus:tw-border-brand-500 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-brand-500"
                   aria-label="Ship heading in degrees"
+                  @focus="onFineTuneFocus"
+                  @blur="onFineTuneBlur"
                   @change="
                     headingSlider.handleChange(
                       clamp($event.target.value, 0, 359),
@@ -410,6 +438,8 @@ function clamp(value, min, max) {
                   :value="strengthSlider.local.value.toFixed(1)"
                   class="tw-w-20 tw-rounded-md tw-border tw-border-slate-300 tw-bg-white tw-px-2 tw-py-1 tw-text-right tw-text-sm tw-tabular-nums focus:tw-border-brand-500 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-brand-500"
                   aria-label="Correction strength percent"
+                  @focus="onFineTuneFocus"
+                  @blur="onFineTuneBlur"
                   @change="
                     strengthSlider.handleChange(
                       clamp($event.target.value, 0, 150),
